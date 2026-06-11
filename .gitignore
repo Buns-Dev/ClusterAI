@@ -1,0 +1,20 @@
+# Python bytecode and caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environment configuration
+.env
+.venv
+env/
+venv/
+ENV/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# NOVA local execution artifacts
+screenshot.png
+nova_memory.json
+*.log
