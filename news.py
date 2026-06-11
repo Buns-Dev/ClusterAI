@@ -1,9 +1,8 @@
-# news.py – Immersive News Panel with Voice Isolation Filters
 import feedparser
 import urllib.parse
 
 def get_news(source_or_country="bbc"):
-    """Fetch top headlines, providing a graphical frame and an optimized voice cue."""
+    """Fetches RSS endpoint payloads formatted for HUD distribution frameworks."""
     feeds = {
         "bbc": "http://feeds.bbci.co.uk/news/rss.xml",
         "reuters": "https://www.reuters.com/rss/topNews",
@@ -28,7 +27,6 @@ def get_news(source_or_country="bbc"):
         entries = feed.entries[:5]
         
         if entries:
-            # Channel 1: Graphical display box
             panel = f"{header_title}\n"
             panel += "———————————————————————————————————————————————————————\n"
             for idx, entry in enumerate(entries, 1):

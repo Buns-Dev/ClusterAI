@@ -1,21 +1,18 @@
-# advanced_math.py - Full Symbolic Mathematics Engine
 import sympy as sp
 import re
 
 def clean_expression(raw_expr):
-    """Standardizes spoken math and symbols into Python-readable math notation."""
+    """Standardizes spoken math and math notation into Python-compatible syntax."""
     expr_str = raw_expr.replace('^', '**')
     expr_str = expr_str.replace(' cube', '**3').replace(' square', '**2')
-    # Convert implicit multiplication (e.g., "2x" to "2*x")
     expr_str = re.sub(r'(\d)([a-zA-Z])', r'\1*\2', expr_str)
     return expr_str.strip()
 
 def process_math_query(query):
-    """Routes and evaluates natural language mathematical problems symbolically."""
+    """Parses natural language requests and evaluates symbolic calculus or algebra."""
     clean_query = query.lower().strip()
     x = sp.Symbol('x')
     
-    # 1. DEFINITE INTEGRALS (e.g., "integrate x^2 from 0 to 3")
     if "integrate" in clean_query and "from" in clean_query:
         try:
             match = re.search(r'integrate (.*) from ([-.\d]+) to ([-.\d]+)', clean_query)
@@ -27,7 +24,8 @@ def process_math_query(query):
                 
                 expr = sp.sympify(expr_str)
                 result = sp.integrate(expr, (x, lower_limit, upper_limit))
-                if float(result).is_integer(): result = int(result)
+                if float(result).is_integer(): 
+                    result = int(result)
                 
                 return {
                     "ui": f"🧮 CALCULUS MATRIX :: DEFINITE INTEGRATION\n"
@@ -42,7 +40,6 @@ def process_math_query(query):
         except Exception as e:
             return {"ui": f"⚠️ Integration Failure: {e}", "voice": "Failed to resolve integral bounds."}
 
-    # 2. DERIVATIVES (e.g., "derivative of x^3 + 5x")
     elif "differentiate" in clean_query or "derivative" in clean_query:
         try:
             raw_expr = clean_query.replace("differentiate", "").replace("derivative of", "").strip()
@@ -64,7 +61,6 @@ def process_math_query(query):
         except Exception as e:
             return {"ui": f"⚠️ Differentiation Failure: {e}", "voice": "Failed to differentiate function."}
 
-    # 3. ALGEBRAIC EQUATION SOLVING (e.g., "solve x^2 - 9")
     elif "solve" in clean_query:
         try:
             raw_eq = clean_query.replace("solve", "").strip()
@@ -89,7 +85,6 @@ def process_math_query(query):
         except Exception as e:
             return {"ui": f"⚠️ Equation Failure: {e}", "voice": "Unable to solve equation variables."}
 
-    # 4. EXPRESSION SIMPLIFICATION (e.g., "simplify (x^2 - 1) / (x - 1)")
     elif "simplify" in clean_query:
         try:
             raw_expr = clean_query.replace("simplify", "").strip()

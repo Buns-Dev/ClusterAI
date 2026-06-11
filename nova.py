@@ -1,4 +1,3 @@
-# nova.py – Clean terminal launch manager
 import re
 import os
 import pyautogui
@@ -9,7 +8,7 @@ import threading
 import keyboard
 import time
 import shared
-import nexus_backend  # 🛠️ FIXED: Standardized backend module integration
+import nexus_backend
 
 UI_ENABLED = True
 try:
@@ -49,19 +48,15 @@ def core_intelligence_loop():
         except Exception:
             pass
 
-# 🛠️ FIXED: Moved to the very bottom so core_intelligence_loop is fully defined before execution
 if __name__ == "__main__":
     print("==================================================")
     print("       ✦  N O V A   I N T E L L I G E N C E  ✦    ")
     print("==================================================")
     
     shared.init() 
-    
-    # Fire up the backend handling arrays
     nexus_backend.start_backend_engine()
     print("Nexus Core Engine Backend Activated...")
     
-    # Safely allocate worker tracking loop threads
     threading.Thread(target=core_intelligence_loop, daemon=True).start()
     
     if UI_ENABLED:

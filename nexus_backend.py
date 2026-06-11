@@ -1,4 +1,3 @@
-# nexus_backend.py – Voice Automation & Intent Routing Engine
 import time
 import datetime
 import threading
@@ -30,14 +29,14 @@ class NexusCore:
             self.recognizer = None
 
     def speak(self, text):
-        """Dispatches plain text to the HUD terminal and speaks it aloud."""
+        """Pushes string components to the HUD frame queue and voice synthesis output."""
         shared.message_queue.put({"type": "speak", "text": text})
         if HAS_VOICE_LIBS and self.tts_engine:
             self.tts_engine.say(text)
             self.tts_engine.runAndWait()
 
     def speak_voice_only(self, text):
-        """Speaks vocal tracking phrase aloud without duplicating text in the UI panel."""
+        """Processes audio generation parameters independently from layout canvas tracking."""
         if HAS_VOICE_LIBS and self.tts_engine:
             self.tts_engine.say(text)
             self.tts_engine.runAndWait()
@@ -46,23 +45,21 @@ class NexusCore:
         hour = datetime.datetime.now().hour
         if hour < 12: return "Good morning sir"
         elif hour < 18: return "Good afternoon sir"
-        else: return "Good evening sir"
+        return "Good evening sir"
 
     def process_query_logic(self, query):
-        """Intercepts specific system tasks or falls back to standard commands."""
+        """Routes complex syntax to isolated modules or generic string parsing maps."""
         clean = query.strip().lower()
         
-        # Intercept Advanced Mathematics Requests First
         if any(t in clean for t in ["integrate", "integral", "calculus", "differentiate", "derivative", "solve", "simplify"]):
             math_res = advanced_math.process_math_query(clean)
             if math_res:
-                return math_res # Returns the dictionary layout safely
+                return math_res
                 
-        # Baseline structural operations fall through to commands.py (Returns String)
         return commands.process_command(query)
 
     def ambient_wake_word_loop(self):
-        """Orchestrates system processes safely via structured type handling."""
+        """Main orchestrator monitoring active queuing pipes and interface toggles."""
         while self.is_running:
             if self.interaction_mode == "text":
                 try:
@@ -73,7 +70,6 @@ class NexusCore:
                         shared.message_queue.put({"type": "listen", "text": cmd})
                         reply = self.process_query_logic(cmd)
                         
-                        # 🛠️ CRITICAL FIX: Safe Type Router to prevent Thread Crashes
                         if isinstance(reply, dict):
                             shared.message_queue.put({"type": "speak", "text": reply["ui"]})
                             threading.Thread(target=self.speak_voice_only, args=(reply["voice"],), daemon=True).start()
@@ -83,7 +79,6 @@ class NexusCore:
                     pass
 
             elif self.interaction_mode == "voice":
-                # Voice mode capture handling fallback pipeline
                 from voice import take_command
                 user_speech = take_command()
                 if user_speech != "none":

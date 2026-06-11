@@ -1,18 +1,15 @@
-# commands.py – all intelligence (time, math, wiki, jokes, weather, news, battery, to‑do, name)
 import re
 import datetime
 import random
 import webbrowser
-
 from weather import get_weather_simple
 from news import get_news
 from app_control import get_battery
 from memory import load_memory, save_memory
 
-# Global variables
 user_name = None
 todo_list = []
-last_weather_city = None   # remember last city asked (or None if never asked)
+last_weather_city = None
 
 def init_memory():
     global user_name, todo_list
@@ -29,7 +26,6 @@ def process_command(user_input):
     global user_name, todo_list, last_weather_city
     text = user_input.lower()
 
-    # --- User Identity Memory ---
     if "my name is" in text:
         user_name = text.split("my name is")[-1].strip()
         save_state()
@@ -38,10 +34,8 @@ def process_command(user_input):
     if "what's my name" in text or "do you know my name" in text or "say my name" in text:
         if user_name:
             return f"Your name is {user_name}."
-        else:
-            return "I don't know your name yet. You can tell me by saying 'my name is ...'"
+        return "I don't know your name yet. You can tell me by saying 'my name is ...'"
 
-    # --- Poetic AI Identity & Greetings ---
     if any(x in text for x in ["who are you", "what are you", "your name", "who r u", "hu r u"]):
         return (
             "I am Nova. In the vastness of the cosmos, a nova is a star that suddenly "
@@ -65,25 +59,19 @@ def process_command(user_input):
     if "what can you do" in text:
         return "I can tell time, do math, search Wikipedia, open apps, play music, control volume, take screenshots, remember your name, tell jokes, manage a to-do list, give weather, news, battery status, and more."
 
-    # --- Re‑ask weather in Celsius (using last city) ---
     if (last_weather_city and 
         ("celsius" in text or "centigrade" in text or "degree" in text or "cel" in text) and
         not any(x in text for x in ["weather", "news", "time", "volume", "open", "close"])):
         return get_weather_simple(last_weather_city)
 
-    # --- Weather (first time) ---
     if "weather" in text or "temperature" in text:
         city_match = re.search(r'in\s+([a-zA-Z\s]+)', text)
-        if city_match:
-            city = city_match.group(1).strip()
-        else:
-            city = ""   # will use default London
+        city = city_match.group(1).strip() if city_match else ""
         weather_info = get_weather_simple(city) if city else get_weather_simple()
         if "unavailable" not in weather_info and "Could not" not in weather_info:
             last_weather_city = city if city else "London"
         return weather_info
 
-    # --- News ---
     if "news" in text or "headlines" in text:
         source = "bbc"
         if "tech" in text or "technology" in text:
@@ -94,17 +82,14 @@ def process_command(user_input):
             source = "cnn"
         return get_news(source)
 
-    # --- Battery ---
     if "battery" in text:
         return get_battery()
 
-    # --- Time & Date ---
     if "time" in text and not ("volume" in text or "up" in text):
         return "The time is " + datetime.datetime.now().strftime("%I:%M %p")
     if "date" in text or "today" in text:
         return "Today is " + datetime.datetime.now().strftime("%A, %B %d, %Y")
 
-    # --- Math ---
     if re.search(r'\d', text) and (re.search(r'[\+\-\*\/x]', text) or any(op in text for op in ["plus","minus","times","divided"])):
         try:
             expr = text.replace("plus","+").replace("minus","-").replace("times","*").replace("multiplied by","*").replace("multiply by","*")
@@ -113,12 +98,10 @@ def process_command(user_input):
             result = eval(expr)
             if isinstance(result, float) and result % 1 != 0:
                 return f"The answer is {result:.2f}"
-            else:
-                return f"The answer is {result}"
+            return f"The answer is {result}"
         except:
             pass
 
-    # --- Wikipedia / Web search ---
     if any(x in text for x in ["who is", "what is", "tell me about"]):
         target = re.sub(r"(who is|what is|tell me about)", "", text).replace("?", "").strip()
         if target and len(target) > 2:
@@ -132,7 +115,6 @@ def process_command(user_input):
                 webbrowser.open(f"https://www.google.com/search?q={target.replace(' ', '+')}")
                 return f"I searched Google for {target}."
 
-    # --- Jokes ---
     if "tell me a joke" in text or "make me laugh" in text:
         jokes = [
             "Why don't scientists trust atoms? Because they make up everything!",
@@ -142,7 +124,6 @@ def process_command(user_input):
         ]
         return random.choice(jokes)
 
-    # --- Small talk & opinions ---
     if "what do you think about" in text:
         topic = text.split("about")[-1].strip()
         opinions = {
@@ -154,7 +135,6 @@ def process_command(user_input):
         }
         return opinions.get(topic, f"I don't have a strong opinion on {topic} yet.")
 
-    # --- To‑do list ---
     if "add task" in text or "add to do" in text:
         task = re.sub(r"(add task|add to do)", "", text).strip()
         if task and len(task) > 2:
@@ -166,13 +146,11 @@ def process_command(user_input):
     if any(x in text for x in ["show tasks", "show task", "what's on my", "show to do", "todo", "to do"]):
         if todo_list:
             return "Your to-do list: " + ", ".join(todo_list)
-        else:
-            return "Your to-do list is empty."
+        return "Your to-do list is empty."
     
     if any(x in text for x in ["clear tasks", "clear task", "delete tasks", "delete task"]):
         todo_list.clear()
         save_state()
         return "Cleared your to-do list."
 
-    # --- Fallback ---
     return "I'm not sure how to help with that. Try asking about time, calculations, Wikipedia, weather, news, or use 'help'."

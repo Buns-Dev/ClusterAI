@@ -1,4 +1,3 @@
-# ui.py – Pure Visual Renderer & Cinematic Interface
 import customtkinter as ctk
 import tkinter as tk
 import psutil
@@ -8,7 +7,6 @@ import random
 import shared
 from PIL import Image, ImageTk, ImageFilter, ImageDraw
 
-# --- Cosmic HUD Palette ---
 BG_VOID = "#020205"
 HUD_CYAN = "#00f0ff"
 NOVA_MAGENTA = "#f900ff"
@@ -115,14 +113,24 @@ def redraw_space_canvas():
 def do_zoom_animation():
     global zoom_progress
     zoom_progress += 0.04
-    if zoom_progress >= 1.0: zoom_progress = 1.0; finalize_engine_launch()
-    else: redraw_space_canvas(); app.after(16, do_zoom_animation)
+    if zoom_progress >= 1.0: 
+        zoom_progress = 1.0
+        finalize_engine_launch()
+    else: 
+        redraw_space_canvas()
+        app.after(16, do_zoom_animation)
 
 def do_zoom_out_animation():
     global zoom_progress, engine_state
     zoom_progress -= 0.04
-    if zoom_progress <= 0.0: zoom_progress = 0.0; engine_state = "orbit"; legend_frame.place(relx=0.04, rely=0.84, anchor="w"); redraw_space_canvas()
-    else: redraw_space_canvas(); app.after(16, do_zoom_out_animation)
+    if zoom_progress <= 0.0: 
+        zoom_progress = 0.0
+        engine_state = "orbit"
+        legend_frame.place(relx=0.04, rely=0.84, anchor="w")
+        redraw_space_canvas()
+    else: 
+        redraw_space_canvas()
+        app.after(16, do_zoom_out_animation)
 
 def on_canvas_motion(event):
     global flash_glow_radius, think_glow_radius
@@ -143,7 +151,8 @@ def on_canvas_click(event):
     if engine_state != "orbit": return
     w, h = bg_canvas.winfo_width(), bg_canvas.winfo_height()
     if ((event.x - (w * 0.35)) ** 2 + (event.y - (h * 0.45)) ** 2) ** 0.5 < 120:
-        bg_canvas.config(cursor=""); legend_frame.place_forget()
+        bg_canvas.config(cursor="")
+        legend_frame.place_forget()
         engine_state, zoom_target, shared.selected_model = "zooming", "flash", "flash"
         do_zoom_animation()
     elif ((event.x - (w * 0.65)) ** 2 + (event.y - (h * 0.45)) ** 2) ** 0.5 < 120:
@@ -151,7 +160,8 @@ def on_canvas_click(event):
 
 def finalize_engine_launch():
     global engine_state
-    engine_state = "active"; redraw_space_canvas()
+    engine_state = "active"
+    redraw_space_canvas()
     top_bar.pack(fill="x", padx=15, pady=(15, 0))
     bot_line.pack(fill="x", padx=15, pady=(0, 10))
     chat_area.pack(fill="both", expand=True, padx=15, pady=(0, 15))
@@ -161,7 +171,8 @@ def finalize_engine_launch():
 def return_to_orbit():
     global engine_state, zoom_progress
     top_bar.pack_forget(); bot_line.pack_forget(); chat_area.pack_forget(); dock_frame.pack_forget()
-    engine_state, zoom_progress = "zooming", 1.0; do_zoom_out_animation()
+    engine_state, zoom_progress = "zooming", 1.0
+    do_zoom_out_animation()
 
 def get_system_stats():
     return f"💻 CPU: {psutil.cpu_percent()}%  |  🧠 RAM: {psutil.virtual_memory().percent}%  |  💾 DISK: {psutil.disk_usage('/').percent}%"
@@ -196,10 +207,14 @@ def add_message(speaker, text, is_user=False):
     ctk.CTkLabel(header, text=speaker, font=("Segoe UI", 11, "bold"), text_color=USER_BLUE if is_user else NOVA_MAGENTA).pack(side="left")
     ctk.CTkLabel(header, text=datetime.datetime.now().strftime("%I:%M %p"), font=("Segoe UI", 9), text_color="#475569").pack(side="right", padx=(12, 0))
     lbl_text = ctk.CTkLabel(bubble, text=text if is_user else "", font=("Segoe UI", 13), text_color=TEXT_GLOW, justify="left", wraplength=max(420, int(app.winfo_width() * 0.65)))
-    lbl_text.pack(anchor="w", padx=2, pady=(0, 2)); tracked_labels.append(lbl_text)
+    lbl_text.pack(anchor="w", padx=2, pady=(0, 2))
+    tracked_labels.append(lbl_text)
+    
     if not is_user:
         def type_effect(cl=0):
-            if cl <= len(text): lbl_text.configure(text=text[:cl]); app.after(12, type_effect, cl + 1)
+            if cl <= len(text): 
+                lbl_text.configure(text=text[:cl])
+                app.after(12, type_effect, cl + 1)
         type_effect()
     app.after(10, lambda: chat_area._parent_canvas.yview_moveto(1.0))
 
@@ -215,7 +230,9 @@ def update_ui():
 
 def send_command(event=None):
     cmd = command_entry.get("1.0", tk.END).strip()
-    if cmd: shared.command_queue.put(cmd); command_entry.delete("1.0", tk.END)
+    if cmd: 
+        shared.command_queue.put(cmd)
+        command_entry.delete("1.0", tk.END)
     return "break"
 
 def start_ui():
@@ -252,10 +269,13 @@ def start_ui():
     entry_container.pack(side="left", fill="x", expand=True, ipady=2)
     
     command_entry = tk.Text(entry_container, height=2, wrap="word", bg="#000000", fg=TEXT_GLOW, insertbackground=HUD_CYAN, font=("Segoe UI", 13), relief="flat", borderwidth=0)
-    command_entry.pack(fill="x", expand=True, padx=14, pady=8); command_entry.bind("<Return>", send_command)
+    command_entry.pack(fill="x", expand=True, padx=14, pady=8)
+    command_entry.bind("<Return>", send_command)
     
     ctk.CTkButton(dock_frame, text=">", command=send_command, font=("Segoe UI", 15, "bold"), fg_color="#000000", hover_color="#090d16", text_color=USER_BLUE, width=50, height=46, corner_radius=12, border_width=1, border_color="#111827").pack(side="right", padx=(10, 0))
     ctk.CTkButton(dock_frame, text="🎤", command=lambda: shared.command_queue.put("/voice_capture_intent"), font=("Segoe UI", 14), fg_color="#000000", hover_color="#090d16", text_color=HUD_CYAN, width=50, height=46, corner_radius=12, border_width=1, border_color="#111827").pack(side="right", padx=(10, 0))
 
-    app.after(100, redraw_space_canvas); app.after(150, update_stats); app.after(200, update_ui)
+    app.after(100, redraw_space_canvas)
+    app.after(150, update_stats)
+    app.after(200, update_ui)
     app.mainloop()

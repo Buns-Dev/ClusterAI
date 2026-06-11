@@ -1,11 +1,9 @@
-# weather.py – Immersive Meteorological Telemetry Panel with Voice Separation
 import requests
 import re
 
 def get_weather_simple(city="Karachi"):
-    """Return an immersive climate panel for UI and a clean phrase for TTS voice."""
+    """Fetches real-time meteorological data and formats it for dual-channel UI/Voice output."""
     try:
-        # Force metric units via wttr.in format string
         url = f"https://wttr.in/{city}?u&format=%C|%t|%h|%w"
         response = requests.get(url, timeout=10)
         
@@ -16,7 +14,6 @@ def get_weather_simple(city="Karachi"):
             humidity = parts[2]
             wind = parts[3] if len(parts) > 3 else "N/A"
             
-            # Metric conversion guard
             if '°F' in temp:
                 match = re.search(r'([+-]?\d+)°F', temp)
                 if match:
@@ -24,7 +21,6 @@ def get_weather_simple(city="Karachi"):
                     c_temp = int((f_temp - 32) * 5/9)
                     temp = f"+{c_temp}°C" if c_temp > 0 else f"{c_temp}°C"
             
-            # Channel 1: The beautiful visual HUD frame
             ui_panel = (
                 f"🛰️ METEOROLOGICAL DIAGNOSTIC MATRIX :: {city.upper()}\n"
                 f"———————————————————————————————————————————————————————\n"
@@ -36,7 +32,6 @@ def get_weather_simple(city="Karachi"):
                 f"📡 Climatology telemetry synchronized successfully."
             )
             
-            # Channel 2: Clean speech data for audio engine
             spoken_temp = temp.replace("+", "").replace("°C", " degrees Celsius")
             voice_phrase = f"The climate profile for {city} indicates {condition} conditions at {spoken_temp}."
             

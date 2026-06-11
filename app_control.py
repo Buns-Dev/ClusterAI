@@ -1,4 +1,3 @@
-# app_control.py – open/close apps, screenshot, YouTube, battery
 import os
 import webbrowser
 import pywhatkit
@@ -7,7 +6,7 @@ import psutil
 from AppOpener import open as open_app, close as close_app
 
 def open_application(app_name):
-    """Open an application by name."""
+    """Opens target application by name with browser path fallback mappings."""
     if app_name in ["edge", "microsoft edge"]:
         edge_paths = [
             r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
@@ -22,7 +21,7 @@ def open_application(app_name):
         open_app(app_name, match_closest=True)
 
 def close_application(app_name):
-    """Close an application by name, using taskkill for common ones."""
+    """Terminates application execution using Taskkill or AppOpener methods."""
     process_map = {
         "edge": "msedge.exe", "microsoft edge": "msedge.exe", "age": "msedge.exe",
         "ed": "msedge.exe", "ege": "msedge.exe",
@@ -45,15 +44,14 @@ def take_screenshot():
     pyautogui.screenshot("screenshot.png")
 
 def get_battery():
-    """Return battery percentage and charging status."""
+    """Retrieves battery percentage and device charging profiles."""
     try:
         battery = psutil.sensors_battery()
         if battery:
             percent = battery.percent
             plugged = "Plugged in" if battery.power_plugged else "On battery"
             return f"Battery at {percent}%. {plugged}."
-        else:
-            return "No battery detected."
+        return "No battery detected."
     except ImportError:
         return "psutil not installed. Run 'pip install psutil'."
     except Exception as e:
