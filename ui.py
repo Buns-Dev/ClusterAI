@@ -242,7 +242,6 @@ def start_ui():
     app = ctk.CTk()
     app.title("NOVA Intelligence Suite")
 
-    # ─── BULLETPROOF WINDOWS NATIVE TRAY INTERACTION ───
     icon_path = os.path.join(os.path.dirname(__file__), "star.ico")
     
     if os.path.exists(icon_path):
