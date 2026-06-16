@@ -272,7 +272,6 @@ def start_ui():
                 ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon)
         except Exception as e:
             print(f"HUD Alert: Windows API shortcut dropped: {e}")
-    # ───────────────────────────────────────────────────
 
     app.geometry("900x760")
     app.minsize(620, 520)
@@ -294,7 +293,6 @@ def start_ui():
     # --- ADDED THE TOP-LEFT LOGO FIX HERE AS WELL ---
     logo_img = ctk.CTkImage(light_image=Image.open(icon_path), dark_image=Image.open(icon_path), size=(22, 22))
     ctk.CTkLabel(top_bar, image=logo_img, text="").pack(side="left", padx=(15, 5))
-    # ------------------------------------------------
     
     ctk.CTkButton(top_bar, text="⏴ BACK", command=return_to_orbit, width=60, fg_color="transparent", hover_color="#111827", text_color=HUD_CYAN, font=("Segoe UI", 12, "bold")).pack(side="left", padx=(5, 5), pady=10)
     ctk.CTkLabel(top_bar, text="✦  N O V A", font=("Segoe UI Semibold", 14, "bold"), text_color=HUD_CYAN).pack(side="left", padx=10, pady=10)
