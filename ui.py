@@ -4,6 +4,7 @@ import psutil
 import queue
 import datetime
 import random
+import os
 import shared
 from PIL import Image, ImageTk, ImageFilter, ImageDraw
 
@@ -240,6 +241,40 @@ def start_ui():
     load_assets()
     app = ctk.CTk()
     app.title("NOVA Intelligence Suite")
+
+    # ─── BULLETPROOF WINDOWS NATIVE TRAY INTERACTION ───
+    icon_path = os.path.join(os.path.dirname(__file__), "star.ico")
+    
+    if os.path.exists(icon_path):
+        try:
+            # 1. Standard Tkinter pass for Window Title
+            app.iconbitmap(icon_path)
+            
+            # 2. Direct Windows Win32 API Injection (Forces Taskbar Override)
+            import ctypes
+            
+            # Load the icon file via Windows native engine
+            IMAGE_ICON = 1
+            LR_LOADFROMFILE = 0x00000010
+            hicon = ctypes.windll.user32.LoadImageW(
+                None, icon_path, IMAGE_ICON, 0, 0, LR_LOADFROMFILE
+            )
+            
+            if hicon:
+                app.update_idletasks() # Force OS window generation
+                hwnd = ctypes.windll.user32.GetParent(app.winfo_id())
+                
+                WM_SETICON = 0x0080
+                ICON_SMALL = 0
+                ICON_BIG = 1
+                
+                # Push directly to Windows Taskbar System
+                ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, hicon)
+                ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon)
+        except Exception as e:
+            print(f"HUD Alert: Windows API shortcut dropped: {e}")
+    # ───────────────────────────────────────────────────
+
     app.geometry("900x760")
     app.minsize(620, 520)
     app.configure(fg_color=BG_VOID)
@@ -256,7 +291,13 @@ def start_ui():
     ctk.CTkLabel(legend_frame, text="● Link 02 -> Synapse Engine [LOCKED]", font=("Consolas", 11), text_color=NOVA_MAGENTA).pack(anchor="w", padx=14, pady=(2, 12))
 
     top_bar = ctk.CTkFrame(app, fg_color="#000000", corner_radius=0, height=45, border_width=1, border_color=HUD_CYAN)
-    ctk.CTkButton(top_bar, text="⏴ BACK", command=return_to_orbit, width=60, fg_color="transparent", hover_color="#111827", text_color=HUD_CYAN, font=("Segoe UI", 12, "bold")).pack(side="left", padx=(10, 5), pady=10)
+    
+    # --- ADDED THE TOP-LEFT LOGO FIX HERE AS WELL ---
+    logo_img = ctk.CTkImage(light_image=Image.open(icon_path), dark_image=Image.open(icon_path), size=(22, 22))
+    ctk.CTkLabel(top_bar, image=logo_img, text="").pack(side="left", padx=(15, 5))
+    # ------------------------------------------------
+    
+    ctk.CTkButton(top_bar, text="⏴ BACK", command=return_to_orbit, width=60, fg_color="transparent", hover_color="#111827", text_color=HUD_CYAN, font=("Segoe UI", 12, "bold")).pack(side="left", padx=(5, 5), pady=10)
     ctk.CTkLabel(top_bar, text="✦  N O V A", font=("Segoe UI Semibold", 14, "bold"), text_color=HUD_CYAN).pack(side="left", padx=10, pady=10)
     status_label = ctk.CTkLabel(top_bar, text=get_system_stats(), font=("Segoe UI", 11), text_color=HUD_CYAN)
     status_label.pack(side="right", padx=20, pady=10)

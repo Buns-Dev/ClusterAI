@@ -8,6 +8,7 @@ import threading
 import keyboard
 import time
 import shared
+import sys
 import nexus_backend
 
 UI_ENABLED = True
@@ -57,6 +58,14 @@ if __name__ == "__main__":
     nexus_backend.start_backend_engine()
     print("Nexus Core Engine Backend Activated...")
     
+    if sys.platform == "win32":
+        import ctypes
+        try:
+            myappid = "muneeb.nova.intelligencesuite.v1"
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except Exception as e:
+            print(f"Failed to set App ID: {e}")
+
     threading.Thread(target=core_intelligence_loop, daemon=True).start()
     
     if UI_ENABLED:
