@@ -246,10 +246,8 @@ def start_ui():
     
     if os.path.exists(icon_path):
         try:
-            # 1. Standard Tkinter pass for Window Title
             app.iconbitmap(icon_path)
             
-            # 2. Direct Windows Win32 API Injection (Forces Taskbar Override)
             import ctypes
             
             # Load the icon file via Windows native engine
@@ -272,7 +270,7 @@ def start_ui():
                 ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon)
         except Exception as e:
             print(f"HUD Alert: Windows API shortcut dropped: {e}")
-
+    
     app.geometry("900x760")
     app.minsize(620, 520)
     app.configure(fg_color=BG_VOID)
@@ -290,7 +288,6 @@ def start_ui():
 
     top_bar = ctk.CTkFrame(app, fg_color="#000000", corner_radius=0, height=45, border_width=1, border_color=HUD_CYAN)
     
-    # --- ADDED THE TOP-LEFT LOGO FIX HERE AS WELL ---
     logo_img = ctk.CTkImage(light_image=Image.open(icon_path), dark_image=Image.open(icon_path), size=(22, 22))
     ctk.CTkLabel(top_bar, image=logo_img, text="").pack(side="left", padx=(15, 5))
     

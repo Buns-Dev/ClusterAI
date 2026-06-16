@@ -62,6 +62,7 @@ if __name__ == "__main__":
         import ctypes
         try:
             myappid = "muneeb.nova.intelligencesuite.v1"
+            # --- FIX THIS EXACT LINE (Make sure it says windll with two L's) ---
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         except Exception as e:
             print(f"Failed to set App ID: {e}")
