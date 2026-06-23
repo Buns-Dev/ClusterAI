@@ -31,9 +31,13 @@ master_orbs = {"flash": None, "nova": None}
 cached_bg_photo = None
 cached_orb_photos = {}
 
-random.seed(1337)
-stars_data = [(random.random(), random.random(), random.choice([1, 1, 1, 2, 2, 3]), 
-               random.choice(["#ffffff", "#a5f3fc", "#38bdf8", "#c084fc", "#334155"])) for _ in range(260)]
+current_hover = "none"
+
+SPACE_PALETTE = ["#ffffff", "#ff2a2a", "#39ff14", "#3b82f6", "#fffb00", "#ff3399", "#00ffff"]
+CYAN_PALETTE = ["#00f0ff", "#00bfff", "#87ceeb", "#00ffff", "#e0ffff", "#afeeee", "#40e0d0"]
+PURPLE_PALETTE = ["#f900ff", "#bd00ff", "#d300ff", "#e100ff", "#da70d6", "#ba55d3", "#9400d3"]
+
+stars_data = [(random.random(), random.random(), random.randint(1, 3), random.randint(0, 6)) for _ in range(110)]
 
 def generate_master_orb(core_color, core_glow):
     def rgb(h): return tuple(int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
@@ -79,11 +83,16 @@ def redraw_space_canvas():
             bg_canvas.create_image(0, 0, anchor="nw", image=cached_bg_photo)
         return
     
-    for rx, ry, sz, color in stars_data:
+    for rx, ry, sz, c_idx in stars_data:
         x, y = rx * w, ry * h
         if engine_state == "zooming":
             x += (x - (w / 2)) * zoom_progress * 2
             y += (y - (h / 2)) * zoom_progress * 2
+            
+        if current_hover == "nexus": color = CYAN_PALETTE[c_idx]
+        elif current_hover == "synapse": color = PURPLE_PALETTE[c_idx]
+        else: color = SPACE_PALETTE[c_idx]
+            
         bg_canvas.create_oval(x, y, x + sz, y + sz, fill=color, outline=color)
         
     base_cx1, base_cy1, base_cx2, base_cy2 = w * 0.35, h * 0.45, w * 0.65, h * 0.45
@@ -134,16 +143,25 @@ def do_zoom_out_animation():
         app.after(16, do_zoom_out_animation)
 
 def on_canvas_motion(event):
-    global flash_glow_radius, think_glow_radius
+    global flash_glow_radius, think_glow_radius, current_hover 
     if engine_state != "orbit": return
     w, h = bg_canvas.winfo_width(), bg_canvas.winfo_height()
     if w <= 10: return
+    
     df = ((event.x - (w * 0.35)) ** 2 + (event.y - (h * 0.45)) ** 2) ** 0.5
     dt = ((event.x - (w * 0.65)) ** 2 + (event.y - (h * 0.45)) ** 2) ** 0.5
+    
     f_r = 58 if df < 120 else 45
     t_r = 58 if dt < 120 else 45
-    ch = (f_r != flash_glow_radius) or (t_r != think_glow_radius)
+    
+    new_hover = "none"
+    if df < 120: new_hover = "nexus"
+    elif dt < 120: new_hover = "synapse"
+        
+    ch = (f_r != flash_glow_radius) or (t_r != think_glow_radius) or (new_hover != current_hover)
     flash_glow_radius, think_glow_radius = f_r, t_r
+    current_hover = new_hover
+    
     bg_canvas.config(cursor="hand2" if (df < 120 or dt < 120) else "")
     if ch: redraw_space_canvas()
 
@@ -151,23 +169,42 @@ def on_canvas_click(event):
     global engine_state, zoom_target
     if engine_state != "orbit": return
     w, h = bg_canvas.winfo_width(), bg_canvas.winfo_height()
+    
+    # Click Nexus (Allowed)
     if ((event.x - (w * 0.35)) ** 2 + (event.y - (h * 0.45)) ** 2) ** 0.5 < 120:
         bg_canvas.config(cursor="")
         legend_frame.place_forget()
         engine_state, zoom_target, shared.selected_model = "zooming", "flash", "flash"
         do_zoom_animation()
+        
+    # Click Synapse (LOCKED)
     elif ((event.x - (w * 0.65)) ** 2 + (event.y - (h * 0.45)) ** 2) ** 0.5 < 120:
-        add_system_notification("⚠️ Synapse Engine: Core routing configuration required.")
+        # Do NOT launch the animation or set the model. 
+        # Instead, throw an access denied error visually.
+        bg_canvas.config(cursor="X_cursor") # Change cursor to an X
+        shared.message_queue.put({
+            "type": "system", 
+            "text": "❌ ACCESS DENIED: Synapse Matrix is currently offline and locked by Administrator."
+        })
+        # Optional: Reset cursor after 1 second
+        app.after(1000, lambda: bg_canvas.config(cursor=""))
 
 def finalize_engine_launch():
     global engine_state
     engine_state = "active"
     redraw_space_canvas()
+    
+    accent = HUD_CYAN if shared.selected_model == "flash" else NOVA_MAGENTA
+    top_bar.configure(border_color=accent)
+    bot_line.configure(fg_color=accent)
+    
     top_bar.pack(fill="x", padx=15, pady=(15, 0))
     bot_line.pack(fill="x", padx=15, pady=(0, 10))
     chat_area.pack(fill="both", expand=True, padx=15, pady=(0, 15))
     dock_frame.pack(fill="x", padx=15, pady=(0, 15))
-    add_system_notification("⚡ Nexus Terminal Matrix Online. Active Passive Listening.")
+    
+    node_name = "NEXUS COGNITIVE ROUTER" if shared.selected_model == "flash" else "SYNAPSE DEEP CORE"
+    add_system_notification(f"⚡ {node_name} ENGAGED // NEURAL STREAM PIPELINE ACCELERATED.")
 
 def return_to_orbit():
     global engine_state, zoom_progress
@@ -184,11 +221,7 @@ def update_stats():
 
 def on_window_resize(event):
     if event.widget == app:
-        dw = max(420, int(event.width * 0.65))
-        for lbl in tracked_labels:
-            try: lbl.configure(wraplength=dw)
-            except: pass
-        redraw_space_canvas()
+        app.after(50, redraw_space_canvas)
 
 def add_system_notification(text):
     row = ctk.CTkFrame(chat_area, fg_color="transparent")
@@ -205,27 +238,41 @@ def add_message(speaker, text, is_user=False):
     bubble.pack(side="right" if is_user else "left", ipadx=16, ipady=12)
     header = ctk.CTkFrame(bubble, fg_color="transparent", height=20)
     header.pack(fill="x", padx=2, pady=(0, 4))
-    ctk.CTkLabel(header, text=speaker, font=("Segoe UI", 11, "bold"), text_color=USER_BLUE if is_user else NOVA_MAGENTA).pack(side="left")
+    
+    color_label = USER_BLUE if is_user else (HUD_CYAN if shared.selected_model == "flash" else NOVA_MAGENTA)
+    ctk.CTkLabel(header, text=speaker, font=("Segoe UI", 11, "bold"), text_color=color_label).pack(side="left")
     ctk.CTkLabel(header, text=datetime.datetime.now().strftime("%I:%M %p"), font=("Segoe UI", 9), text_color="#475569").pack(side="right", padx=(12, 0))
-    lbl_text = ctk.CTkLabel(bubble, text=text if is_user else "", font=("Segoe UI", 13), text_color=TEXT_GLOW, justify="left", wraplength=max(420, int(app.winfo_width() * 0.65)))
+    
+    # 🌟 DYNAMIC FORMATTING INTERCEPT: Auto-detect code, tables, or JSON structures
+    is_structured_data = any(indicator in text for indicator in ["def ", "import ", " {", "|---", "```", "    "])
+    chosen_font = ("Consolas", 11) if (is_structured_data and not is_user) else ("Segoe UI", 13)
+    
+    lbl_text = ctk.CTkLabel(bubble, text=text if is_user else "", font=chosen_font, text_color=TEXT_GLOW, justify="left", wraplength=max(420, int(app.winfo_width() * 0.65)))
     lbl_text.pack(anchor="w", padx=2, pady=(0, 2))
     tracked_labels.append(lbl_text)
     
     if not is_user:
+        # 🌟 ADAPTIVE TYPEWRITER STREAMING: Scales up print chunks for large files
+        step_increment = 4 if len(text) > 400 else 1 
         def type_effect(cl=0):
             if cl <= len(text): 
                 lbl_text.configure(text=text[:cl])
-                app.after(12, type_effect, cl + 1)
+                app.after(5, type_effect, cl + step_increment) # Faster ticking interval
         type_effect()
+        
     app.after(10, lambda: chat_area._parent_canvas.yview_moveto(1.0))
 
 def update_ui():
     try:
         while True:
             msg = shared.message_queue.get_nowait()
-            if msg["type"] == "speak": add_message("✦ NOVA", msg["text"], False)
-            elif msg["type"] == "listen": add_message("⌨️ YOU" if "lets chat" in msg["text"].lower() else "🗣️ COMMAND", msg["text"], True)
-            elif msg["type"] == "system": add_system_notification(msg["text"])
+            if msg["type"] == "speak": 
+                name = "🌌 CLUSTER AI" if shared.selected_model == "flash" else "🔮 SYNAPSE CORE"
+                add_message(name, msg["text"], False)
+            elif msg["type"] == "listen": 
+                add_message("⌨️ YOU" if "lets chat" in msg["text"].lower() else "🗣️ COMMAND", msg["text"], True)
+            elif msg["type"] == "system": 
+                add_system_notification(msg["text"])
     except queue.Empty: pass
     app.after(50, update_ui)
 
@@ -240,32 +287,20 @@ def start_ui():
     global app, chat_area, command_entry, status_label, bg_canvas, legend_frame, top_bar, bot_line, dock_frame
     load_assets()
     app = ctk.CTk()
-    app.title("NOVA Intelligence Suite")
+    app.title("ClusterAI - Next-Gen Intelligence Suite")
 
-    icon_path = os.path.join(os.path.dirname(__file__), "star.ico")
-    
+    icon_path = os.path.join(os.path.dirname(__file__), "clusterAI.ico")
     if os.path.exists(icon_path):
         try:
             app.iconbitmap(icon_path)
-            
             import ctypes
-            
-            # Load the icon file via Windows native engine
             IMAGE_ICON = 1
             LR_LOADFROMFILE = 0x00000010
-            hicon = ctypes.windll.user32.LoadImageW(
-                None, icon_path, IMAGE_ICON, 0, 0, LR_LOADFROMFILE
-            )
-            
+            hicon = ctypes.windll.user32.LoadImageW(0, icon_path, IMAGE_ICON, 0, 0, LR_LOADFROMFILE)
             if hicon:
-                app.update_idletasks() # Force OS window generation
-                hwnd = ctypes.windll.user32.GetParent(app.winfo_id())
-                
+                hwnd = ctypes.windll.user32.GetActiveWindow()
                 WM_SETICON = 0x0080
-                ICON_SMALL = 0
-                ICON_BIG = 1
-                
-                # Push directly to Windows Taskbar System
+                ICON_SMALL, ICON_BIG = 0, 1
                 ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, hicon)
                 ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon)
         except Exception as e:
@@ -282,17 +317,20 @@ def start_ui():
 
     legend_frame = ctk.CTkFrame(app, fg_color="#020206", border_width=1, border_color="#111827", corner_radius=10)
     legend_frame.place(relx=0.04, rely=0.84, anchor="w")
-    ctk.CTkLabel(legend_frame, text="SYSTEM MAP ROUTING DIRECTORY", font=("Segoe UI Semibold", 11, "bold"), text_color="#6b7280").pack(anchor="w", padx=14, pady=(12, 8))
-    ctk.CTkLabel(legend_frame, text="● Link 01 -> Nexus Engine [ONLINE]", font=("Consolas", 11), text_color=HUD_CYAN).pack(anchor="w", padx=14, pady=2)
-    ctk.CTkLabel(legend_frame, text="● Link 02 -> Synapse Engine [LOCKED]", font=("Consolas", 11), text_color=NOVA_MAGENTA).pack(anchor="w", padx=14, pady=(2, 12))
+    ctk.CTkLabel(legend_frame, text="DYNAMIC INTEGRATION INTERFACE DIRECTORY", font=("Segoe UI Semibold", 11, "bold"), text_color="#6b7280").pack(anchor="w", padx=14, pady=(12, 8))
+    ctk.CTkLabel(legend_frame, text="● Node 01 -> Nexus Routing Module [ONLINE]", font=("Consolas", 11), text_color=HUD_CYAN).pack(anchor="w", padx=14, pady=2)
+    ctk.CTkLabel(legend_frame, text="● Node 02 -> Synapse LLM Matrix [OFFLINE]", font=("Consolas", 11), text_color=NOVA_MAGENTA).pack(anchor="w", padx=14, pady=(2, 12))
 
     top_bar = ctk.CTkFrame(app, fg_color="#000000", corner_radius=0, height=45, border_width=1, border_color=HUD_CYAN)
     
-    logo_img = ctk.CTkImage(light_image=Image.open(icon_path), dark_image=Image.open(icon_path), size=(22, 22))
-    ctk.CTkLabel(top_bar, image=logo_img, text="").pack(side="left", padx=(15, 5))
+    try:
+        logo_img = ctk.CTkImage(light_image=Image.open(icon_path), dark_image=Image.open(icon_path), size=(22, 22))
+        ctk.CTkLabel(top_bar, image=logo_img, text="").pack(side="left", padx=(15, 5))
+    except Exception:
+        pass
     
-    ctk.CTkButton(top_bar, text="⏴ BACK", command=return_to_orbit, width=60, fg_color="transparent", hover_color="#111827", text_color=HUD_CYAN, font=("Segoe UI", 12, "bold")).pack(side="left", padx=(5, 5), pady=10)
-    ctk.CTkLabel(top_bar, text="✦  N O V A", font=("Segoe UI Semibold", 14, "bold"), text_color=HUD_CYAN).pack(side="left", padx=10, pady=10)
+    ctk.CTkButton(top_bar, text="⏴ DISCONNECT", command=return_to_orbit, width=60, fg_color="transparent", hover_color="#111827", text_color=HUD_CYAN, font=("Segoe UI", 12, "bold")).pack(side="left", padx=(5, 5), pady=10)
+    ctk.CTkLabel(top_bar, text="🌌 CLUSTER SYSTEM HUD", font=("Segoe UI Semibold", 14, "bold"), text_color=HUD_CYAN).pack(side="left", padx=10, pady=10)
     status_label = ctk.CTkLabel(top_bar, text=get_system_stats(), font=("Segoe UI", 11), text_color=HUD_CYAN)
     status_label.pack(side="right", padx=20, pady=10)
 
@@ -310,7 +348,7 @@ def start_ui():
     ctk.CTkButton(dock_frame, text=">", command=send_command, font=("Segoe UI", 15, "bold"), fg_color="#000000", hover_color="#090d16", text_color=USER_BLUE, width=50, height=46, corner_radius=12, border_width=1, border_color="#111827").pack(side="right", padx=(10, 0))
     ctk.CTkButton(dock_frame, text="🎤", command=lambda: shared.command_queue.put("/voice_capture_intent"), font=("Segoe UI", 14), fg_color="#000000", hover_color="#090d16", text_color=HUD_CYAN, width=50, height=46, corner_radius=12, border_width=1, border_color="#111827").pack(side="right", padx=(10, 0))
 
-    app.after(100, redraw_space_canvas)
+    app.after(50, redraw_space_canvas)
     app.after(150, update_stats)
     app.after(200, update_ui)
     app.mainloop()

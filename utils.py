@@ -1,4 +1,5 @@
 import datetime
+from commands import user_name
 from voice import speak
 
 def wish_me():
@@ -10,4 +11,4 @@ def wish_me():
     else:
         greeting = "Good Evening."
         
-    speak(f"{greeting} What is your agenda for today?")
+    speak(f"{greeting, user_name}, What is your agenda for today?")

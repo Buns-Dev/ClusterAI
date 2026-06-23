@@ -1,20 +1,17 @@
-# Python bytecode and caching
+# Ignore the massive local LLM weight files
+models/
+*.gguf
+*.bin
+
+# Ignore Python caches
 __pycache__/
 *.py[cod]
-*$py.class
 
-# Local environment configuration
-.env
-.venv
-env/
+# Ignore Virtual Environments
 venv/
-ENV/
+env/
+.env
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# NOVA local execution artifacts
-screenshot.png
+# Ignore Local User Memory and temporary screenshots
 nova_memory.json
-*.log
+screenshot.png

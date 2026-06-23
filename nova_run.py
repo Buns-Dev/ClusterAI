@@ -41,7 +41,7 @@ def capture_voice_and_queue():
 shared.voice_trigger_callback = capture_voice_and_queue
 
 def core_intelligence_loop():
-    """Loops indefinitely to process backlogged command strings."""
+    """Loops indefinitely to process backlogged command strings when UI is disabled."""
     wish_me()
     while True:
         try:
@@ -51,26 +51,25 @@ def core_intelligence_loop():
 
 if __name__ == "__main__":
     print("==================================================")
-    print("       ✦  N O V A   I N T E L L I G E N C E  ✦    ")
+    print("       🌌   C L U S T E R   A I   C O R E  🌌     ")
+    print("           [ System Architecture v1.2 ]           ")
     print("==================================================")
     
     shared.init() 
     nexus_backend.start_backend_engine()
-    print("Nexus Core Engine Backend Activated...")
+    print("📡 Nexus Core Dynamic Router Activated...")
     
     if sys.platform == "win32":
-        import ctypes
         try:
+            import ctypes
             myappid = "muneeb.nova.intelligencesuite.v1"
-            # --- FIX THIS EXACT LINE (Make sure it says windll with two L's) ---
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+            if hasattr(ctypes, "windll"):
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         except Exception as e:
             print(f"Failed to set App ID: {e}")
 
-    threading.Thread(target=core_intelligence_loop, daemon=True).start()
-    
     if UI_ENABLED:
+        print("🖥️ Synchronizing UI Display Grid...")
         start_ui()
     else:
-        while True:
-            time.sleep(1)
+        core_intelligence_loop()
