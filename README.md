@@ -1,47 +1,199 @@
 # ✦ CLUSTERAI Intelligence Suite ✦
-> **Status:** Version 1.1.2 (Local Neural Alignment Stable)  
-> **Architecture:** Modular Multi-Threaded Execution Environment with Native Inference
+
+> **Status:** Active Development (Version 1.1.2)  
+> **Architecture:** Modular Multi-Threaded Intelligence Framework  
 > **Codename:** Synoptic Telemetry & Neural Matrix Alignment
 
-CLUSTERAI is a terminal-driven desktop automation, local analytical orchestrator, and interactive HUD interface built in Python. Featuring a cinematic visual layout, background vocal capturing arrays, local symbolic math compilation engines, and an entirely local neural processing layer for zero-latency, private generative logic.
+CLUSTERAI is a Python-based desktop intelligence suite designed for local AI inference, automation, symbolic computation, voice interaction, and real-time telemetry monitoring.
+
+Built around a modular architecture, CLUSTERAI combines a cinematic HUD-inspired interface with a fully local processing pipeline to provide fast, private, and responsive execution. The platform is designed with a local-first philosophy, allowing core AI capabilities to operate directly on the host machine without reliance on cloud services.
+
+Whether performing conversational inference, symbolic mathematics, voice-driven interactions, or automation workflows, CLUSTERAI prioritizes privacy, responsiveness, and system-level flexibility.
 
 ---
 
-## ⚡ Key Architecture Matrix
+## ⚡ Core Architecture
 
-* 🧠 **Native ClusterAI Neural Engine:** Powered by a completely localized Llama 3.2 1B framework running via `llama-cpp-python`. Engineered with hard code-level limits (`n_ctx=4096` / `max_tokens=2048`) to preserve an explicit buffer for incoming prompts and protect system memory during intense local programming logic tasks.
-* 🎚️ **Dual-Process Orchestration Core:** Seamless asynchronous routing across background automation worker nodes and foreground CustomTkinter visual frame rendering loops to eliminate main thread deadlocks and UI freezes.
-* 🧮 **Symbolic Calculus & Algebraic Engine:** On-the-fly, isolated evaluation of advanced mathematical arrays (integrals, derivatives, custom string factoring) processed locally via SymPy before conversational fallback evaluations are ever triggered.
-* 🎙️ **Ambient Acoustic Link:** Asynchronous live speech-to-text and text-to-speech loops using `speech_recognition` and `pyttsx3`, allowing flawless transitions between text input streams and hands-free vocal protocol execution.
-* 🌦️ **Synoptic Weather Telemetry:** An optimized environmental monitoring module that captures, parses, and formats live atmospheric data grids smoothly onto the primary HUD interface without visual data dropouts.
+### 🧠 Native Neural Processing Engine
+
+CLUSTERAI utilizes a locally hosted Llama 3.2 1B Instruct model through `llama-cpp-python`, enabling private, low-latency AI inference directly on the user's system.
+
+The inference layer is configured with controlled context and generation limits to maintain stable memory usage and reliable performance during extended interactions and programming-oriented workloads.
 
 ---
 
-## 🛠️ Environmental Initialization
+### ⚙️ Multi-Threaded Execution Framework
 
-### 1. Prerequisite Installations
-Ensure you have Python 3.12+ initialized on your host machine. Install the environmental software dependencies via your terminal:
+The platform separates computational workloads from graphical rendering through dedicated execution threads.
+
+This architecture allows AI inference, voice processing, telemetry collection, and automation tasks to operate independently of the user interface, helping maintain a smooth and responsive experience.
+
+---
+
+### 🧮 Symbolic Mathematics Engine
+
+CLUSTERAI includes a dedicated symbolic computation layer powered by SymPy.
+
+Supported operations include:
+
+- Algebraic simplification
+- Equation solving
+- Differentiation
+- Integration
+- Expression evaluation
+- Symbolic manipulation
+
+Mathematical expressions are processed locally before conversational fallback logic is invoked.
+
+---
+
+### 🎙️ Voice Interaction Layer
+
+Integrated speech recognition and speech synthesis modules provide hands-free interaction capabilities.
+
+Features include:
+
+- Speech-to-text input
+- Text-to-speech responses
+- Continuous listening workflows
+- Hybrid voice and text interaction modes
+
+---
+
+### 🌦️ Telemetry & Monitoring System
+
+The telemetry subsystem is designed to collect and display environmental and operational information through the primary HUD interface.
+
+Current and planned modules include:
+
+- Weather monitoring
+- System diagnostics
+- Status indicators
+- Data visualization panels
+- Future telemetry extensions
+
+---
+
+## 🔒 Privacy & Offline Operation
+
+CLUSTERAI is designed to function locally on the host machine.
+
+Current versions are capable of running entirely offline, with AI inference, symbolic computation, and core processing executed without cloud-based services.
+
+Future releases may introduce optional internet-enabled modules for enhanced functionality, including:
+
+- External data retrieval
+- Advanced telemetry services
+- Online knowledge augmentation
+- Third-party integrations
+
+These additions are planned as optional features and will not replace the platform's local processing capabilities.
+
+---
+
+## 🚀 Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Buns-Dev/ClusterAI.git
+cd ClusterAI
+```
+
+### 2. Install Dependencies
+
+Ensure Python is installed on your system and install all required packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Local Intelligence Asset Provisioning (CRITICAL)
-Because CLUSTERAI functions 100% offline, the neural weights have been separated into a dedicated GitHub Release Asset to keep the core code repository lightweight and protect repository bandwidth.
+---
 
-1. Navigate to the Releases section of this repository and locate version v1.1.2.
+## 🧠 Model Setup (Required)
 
-2. Download the localized model weights file: Llama-3.2-1B-Instruct-Q4_K_M.gguf.
+To keep the repository lightweight, neural model weights are distributed separately through GitHub Releases.
 
-3. In your local project root directory, create a folder named exactly models/.
+### Steps
 
-4. Drop the downloaded .gguf file directly inside that folder.
+1. Navigate to the Releases section of this repository.
+2. Locate the release matching your installed version.
+3. Download:
 
-> **Note:** The backend engine expects this exact file hierarchy to map the model weights into system memory upon initial startup.
+```text
+Llama-3.2-1B-Instruct-Q4_K_M.gguf
+```
 
-### 3. System Ignition
-To awaken the neural matrix and illuminate the primary interface dashboard, execute the primary runtime runner:
+4. Create a folder named:
+
+```text
+models
+```
+
+5. Place the downloaded model file inside the folder.
+
+Your directory structure should resemble:
+
+```text
+ClusterAI/
+│
+├── models/
+│   └── Llama-3.2-1B-Instruct-Q4_K_M.gguf
+│
+├── nova_run.py
+├── requirements.txt
+└── ...
+```
+
+---
+
+## ▶️ Launching CLUSTERAI
+
+After completing installation and model setup, start the application using:
 
 ```bash
 python nova_run.py
 ```
+
+This will initialize the local inference engine, background service threads, voice modules, telemetry services, and the primary graphical interface.
+
+---
+
+## 🛠️ Development Status
+
+CLUSTERAI is currently under active development.
+
+Features, interface components, and internal architecture may evolve between releases as new capabilities are added and existing systems are refined.
+
+Community feedback, testing, bug reports, and feature suggestions are welcome throughout development.
+
+---
+
+## 📦 Built With
+
+- Python
+- CustomTkinter
+- llama-cpp-python
+- SymPy
+- SpeechRecognition
+- pyttsx3
+
+---
+
+## 🤝 Contributing
+
+Contributions, feature suggestions, bug reports, and improvements are welcome.
+
+If you encounter issues or have ideas for future functionality, feel free to open an issue or submit a pull request.
+
+---
+
+## 📜 License
+
+This project is currently under development.
+
+Licensing information will be finalized and published in a future release.
+
+---
+
+### *Local Intelligence • Private Execution • Modular Automation*
